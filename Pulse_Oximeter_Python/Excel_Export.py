@@ -21,3 +21,4 @@ with open('red_data.csv', 'w', newline='') as red_file:
     writer.writerow(red_data)
 
 print("Data exported to ir_data.csv and red_data.csv.")
+
