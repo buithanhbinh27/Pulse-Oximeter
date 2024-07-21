@@ -34,7 +34,7 @@ def calculate_spo2(red_data, ir_data):
 count=0;
 sampling_frequency = 64
 # Read data from the text file
-with open('output.txt', 'r') as file:
+with open('output_modified.txt', 'r') as file:
     for line in file:
         data = line.strip().split(',')
 
@@ -45,11 +45,7 @@ with open('output.txt', 'r') as file:
         ir_data = np.array(ir_data, dtype=float)
         red_data = np.array(red_data, dtype=float)
 
-        red_normalized = normalize(red_data)
-        ir_normalized = normalize(ir_data)
-
-        calculate_heart_rate(ir_data)
-        calculate_spo2(red_data, ir_data)
+        # heart_rate = calculate_heart_rate(ir_data)
 
         # Biểu diễn các phần tử của mảng trên cùng 1 đồ thị
         plt.figure(figsize=(12, 6))
@@ -79,6 +75,19 @@ with open('output.txt', 'r') as file:
 
         plt.tight_layout()
         plt.show()
+
+        # ... (calculate SpO2 and other processing)
+
+        # Compute FFT of IR data
+        #ir_fft_magnitude = np.abs(fft(ir_data))
+        #ir_freqs = fftfreq(len(ir_data), d=1 / sampling_frequency)
+
+        # Find the peak frequency
+        #peak_index = np.argmax(ir_fft_magnitude)
+        #peak_frequency = np.abs(ir_freqs[peak_index])
+
+        #print(f"Peak frequency: {peak_frequency:.2f} Hz")
+
 
         count+=1
 

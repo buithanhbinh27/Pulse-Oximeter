@@ -28,10 +28,16 @@ void setup() {
     while (1);
   }
 
-  // Setup sensor
-  particleSensor.setup();
-  particleSensor.setPulseAmplitudeRed(0x24); // 0x24 = 36
-  particleSensor.setPulseAmplitudeIR(0x24);  // 0x24 = 36
+
+  // Cấu hình cảm biến
+  byte ledBrightness = 60; // Độ sáng đèn LED (0-255)
+  byte sampleAverage = 4; // Số mẫu trung bình (1, 2, 4, 8, 16, 32)
+  byte ledMode = 2; // Chế độ LED (RED+IR)
+  int sampleRate = 100; // Tốc độ lấy mẫu (50, 100, 167, 200, 400, 600, 800, 1000)
+  int pulseWidth = 411; // Độ rộng xung (69, 118, 215, 411)
+  int adcRange = 4096; // Phạm vi ADC (2048, 4096, 8192, 16384)
+
+  particleSensor.setup(ledBrightness, sampleAverage, ledMode, sampleRate, pulseWidth, adcRange);
 }
 
 void loop() {

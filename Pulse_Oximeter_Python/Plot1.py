@@ -2,7 +2,7 @@ import csv
 import matplotlib.pyplot as plt
 
 # Open the text file
-with open('output.txt', 'r') as file:
+with open('output_modified.txt', 'r') as file:
     lines = file.readlines()
 
 # Open the CSV files
@@ -25,11 +25,8 @@ with open('ir_data.csv', 'w', newline='') as ir_file, open('red_data.csv', 'w', 
         red_data = list(map(float, data[64:]))
 
         # Write the data to the CSV files
-        # for i in range(len(ir_data)):
-
         ir_writer.writerow(ir_data)
         red_writer.writerow(red_data)
-        # Tạo biểu đồ đường
         # Tạo biểu đồ đường
         plt.figure(i)
         plt.plot(ir_data, label='IR Data')
