@@ -10,7 +10,7 @@ long startTime;
 void setup()
 {
   Serial.begin(115200);
-  Wire.begin();
+  Wire.begin(8,9);
 
   if (!particleSensor.begin(Wire, I2C_SPEED_FAST)) {
     Serial.println("MAX30105 was not found. Please check wiring/power.");
@@ -30,6 +30,7 @@ void setup()
 
 void loop()
 { 
+  /*
     for (int i = 0; i < BUFFER_SIZE; i++) {
       redBuffer[i] = particleSensor.getRed();
       irBuffer[i] = particleSensor.getIR();
@@ -45,5 +46,11 @@ void loop()
       Serial.print(",");
     }
     Serial.println();
+    */
+    int redBuffer = particleSensor.getRed();
+    Serial.println(redBuffer);
+    int irBuffer = particleSensor.getIR();
+    Serial.println(irBuffer);
+    delay(500);
 }
 
