@@ -1,33 +1,12 @@
-/*
-  MAX30105 Breakout: Output all the raw Red/IR/Green readings
-  By: Nathan Seidle @ SparkFun Electronics
-  Date: October 2nd, 2016
-  https://github.com/sparkfun/MAX30105_Breakout
-
-  Outputs all Red/IR/Green values.
-
-  Hardware Connections (Breakoutboard to Arduino):
-  -5V = 5V (3.3V is allowed)
-  -GND = GND
-  -SDA = A4 (or SDA)
-  -SCL = A5 (or SCL)
-  -INT = Not connected
-
-  The MAX30105 Breakout can handle 5V or 3.3V I2C logic. We recommend powering the board with 5V
-  but it will also run at 3.3V.
-
-  This code is released under the [MIT License](http://opensource.org/licenses/MIT).
-*/
-
 #include <Wire.h>
 #include "MAX30105.h"
 
 MAX30105 particleSensor;
 
-bool shouldRun = false; // Flag to control data collection
-unsigned long startTime = 0; // Variable to store the start time
-unsigned long count = 0;
-
+#define BUFFER_SIZE 100
+uint16_t irBuffer[BUFFER_SIZE]; // Buffer lưu dữ liệu IR
+uint16_t redBuffer[BUFFER_SIZE]; // Buffer lưu dữ liệu Red
+long startTime;
 void setup()
 {
   Serial.begin(115200);
@@ -38,38 +17,33 @@ void setup()
     while (1);
   }
 
-  // Setup sensor
-  particleSensor.setup();
-  particleSensor.setPulseAmplitudeRed(0x24); // 0x24 = 36
-  particleSensor.setPulseAmplitudeIR(0x24);  // 0x24 = 36
+  // Cấu hình cảm biến
+  byte ledBrightness = 63; // Độ sáng đèn LED (0-255)
+  byte sampleAverage = 4; // Số mẫu trung bình (1, 2, 4, 8, 16, 32)
+  byte ledMode = 2; // Chế độ LED (RED+IR)
+  int sampleRate = 100; // Tốc độ lấy mẫu (50, 100, 167, 200, 400, 600, 800, 1000)
+  int pulseWidth = 411; // Độ rộng xung (69, 118, 215, 411)
+  int adcRange = 8192; // Phạm vi ADC (2048, 4096, 8192, 16384)
+
+  particleSensor.setup(ledBrightness, sampleAverage, ledMode, sampleRate, pulseWidth, adcRange);
 }
 
 void loop()
-{
-  if (shouldRun) {
-    // Check if 5 seconds have passed
-    if (millis() - startTime < 4000) {
-      Serial.print(count);
-      Serial.print("  ");
-      Serial.print(particleSensor.getRed());
-      Serial.print("  ");
-      Serial.print(particleSensor.getIR());
-      Serial.print('\n');
-      count++;
-    } else {
-      shouldRun = false; // Stop data collection after 5 seconds
-      count = 0;
+{ 
+    for (int i = 0; i < BUFFER_SIZE; i++) {
+      redBuffer[i] = particleSensor.getRed();
+      irBuffer[i] = particleSensor.getIR();
     }
-  }
 
-  if (Serial.available()) {
-    char inputChar = Serial.read();
-    if (inputChar == 'a') {
-      shouldRun = true; // Start data collection
-      startTime = millis(); // Record the start time
-    } else if (inputChar == 'b') {
-      shouldRun = false; // Stop data collection
+    for (int i = 0; i < BUFFER_SIZE; i++) {
+    Serial.print(irBuffer[i]);
+    Serial.print(",");
     }
-  }
+  
+    for (int i = 0; i < BUFFER_SIZE; i++) {
+      Serial.print(redBuffer[i]);
+      Serial.print(",");
+    }
+    Serial.println();
 }
 
