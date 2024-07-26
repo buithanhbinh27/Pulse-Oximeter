@@ -30,12 +30,12 @@ void setup() {
 
 
   // Cấu hình cảm biến
-  byte ledBrightness = 60; // Độ sáng đèn LED (0-255)
+  byte ledBrightness = 64; // Độ sáng đèn LED (0-255)
   byte sampleAverage = 4; // Số mẫu trung bình (1, 2, 4, 8, 16, 32)
   byte ledMode = 2; // Chế độ LED (RED+IR)
   int sampleRate = 100; // Tốc độ lấy mẫu (50, 100, 167, 200, 400, 600, 800, 1000)
   int pulseWidth = 411; // Độ rộng xung (69, 118, 215, 411)
-  int adcRange = 4096; // Phạm vi ADC (2048, 4096, 8192, 16384)
+  int adcRange = 8192; // Phạm vi ADC (2048, 4096, 8192, 16384)
 
   particleSensor.setup(ledBrightness, sampleAverage, ledMode, sampleRate, pulseWidth, adcRange);
 }
@@ -58,7 +58,7 @@ void collectData() {
       lastSampleTime = millis();
       redBuffer[numSamples] = particleSensor.getRed();
       irBuffer[numSamples] = particleSensor.getIR();
-      numSamples++;
+      
     }
   }
 
@@ -107,37 +107,37 @@ void calculateFFT() {
   Serial.println(" BPM");
 }
 
-double calculateSpO2() {
-  double irMean = mean(irBuffer, SAMPLES);
-  double redMean = mean(redBuffer, SAMPLES);
+// double calculateSpO2() {
+//   double irMean = mean(irBuffer, SAMPLES);
+//   double redMean = mean(redBuffer, SAMPLES);
 
-  double acIR = acComponent(irBuffer, irMean);
-  double acRed = acComponent(redBuffer, redMean);
+//   double acIR = acComponent(irBuffer, irMean);
+//   double acRed = acComponent(redBuffer, redMean);
 
-  double ratio = (acRed / redMean) / (acIR / irMean);
-  double spo2 = 110 - 25 * ratio; // Simplified estimation formula
+//   double ratio = (acRed / redMean) / (acIR / irMean);
+//   double spo2 = 110 - 25 * ratio; // Simplified estimation formula
 
-  return spo2;
-}
+//   return spo2;
+// }
 
-double mean(double *array, int length) {
-  double sum = 0;
-  for (int i = 0; i < length; i++) {
-    sum += array[i];
-  }
-  return sum / length;
-}
+// double mean(double *array, int length) {
+//   double sum = 0;
+//   for (int i = 0; i < length; i++) {
+//     sum += array[i];
+//   }
+//   return sum / length;
+// }
 
-double acComponent(double *array, double mean) {
-  double maxVal = 0;
-  double minVal = 1e12;
-  for (int i = 0; i < SAMPLES; i++) {
-    if (array[i] > maxVal) {
-      maxVal = array[i];
-    }
-    if (array[i] < minVal) {
-      minVal = array[i];
-    }
-  }
-  return maxVal - minVal;
-}
+// double acComponent(double *array, double mean) {
+//   double maxVal = 0;
+//   double minVal = 1e12;
+//   for (int i = 0; i < SAMPLES; i++) {
+//     if (array[i] > maxVal) {
+//       maxVal = array[i];
+//     }
+//     if (array[i] < minVal) {
+//       minVal = array[i];
+//     }
+//   }
+//   return maxVal - minVal;
+// }

@@ -6,16 +6,16 @@
 MAX30105 particleSensor;
 
 // Định nghĩa các tham số
-#define BUFFER_SIZE 100
+#define BUFFER_LENGTH 100
 
-// Khai báo các biến toàn cục
-uint16_t irBuffer[BUFFER_SIZE]; // Buffer lưu dữ liệu IR
-uint16_t redBuffer[BUFFER_SIZE]; // Buffer lưu dữ liệu Red
-int32_t spo2; // Giá trị SpO2
-int8_t spo2Valid; // Trạng thái hợp lệ của giá trị SpO2
-int32_t heartRate; // Giá trị nhịp tim
-int8_t heartRateValid; // Trạng thái hợp lệ của giá trị nhịp tim
+uint32_t irBuffer[BUFFER_LENGTH]; 
+uint32_t redBuffer[BUFFER_LENGTH];
+int32_t spo2; // Calculated SpO2 value
+int8_t validSPO2; // Indicator to show if the calculated SpO2 is valid
+int32_t heartRate; // Calculated heart rate value
+int8_t validHeartRate; // Indicator to show if the calculated heart rate is valid
 
+//------------------------------------------------------------------------------------------
 void setup() {
   // Khởi tạo giao tiếp Serial
   Serial.begin(115200);
@@ -27,7 +27,7 @@ void setup() {
   }
 
   // Cấu hình cảm biến
-  byte ledBrightness = 63; // Độ sáng đèn LED (0-255)
+  byte ledBrightness = 64; // Độ sáng đèn LED (0-255)
   byte sampleAverage = 4; // Số mẫu trung bình (1, 2, 4, 8, 16, 32)
   byte ledMode = 2; // Chế độ LED (RED+IR)
   int sampleRate = 100; // Tốc độ lấy mẫu (50, 100, 167, 200, 400, 600, 800, 1000)
@@ -40,31 +40,32 @@ void setup() {
 
 void loop() {
   // Đọc dữ liệu từ cảm biến
-  Serial.println("Bat dau doc: ");
+  Serial.println("Start measure: ");
 
-  for (int i = 0; i < BUFFER_SIZE; i++) {
+  for (int i = 0; i < BUFFER_LENGTH; i++) {
     redBuffer[i] = particleSensor.getRed();
     irBuffer[i] = particleSensor.getIR();
+    particleSensor.nextSample();
   }
+  
 
-  Serial.println("Buffer full, starting calculation...");
+  maxim_heart_rate_and_oxygen_saturation(irBuffer, BUFFER_LENGTH, redBuffer, &spo2, &validSPO2, &heartRate, &validHeartRate);
 
-  // Gọi hàm tính toán nhịp tim và SpO2
-  maxim_heart_rate_and_oxygen_saturation(irBuffer, BUFFER_SIZE, redBuffer, &spo2, &spo2Valid, &heartRate, &heartRateValid);
-  Serial.println("Calculate completed!");
-  // Hiển thị kết quả
-  /*
+  // Print results
   Serial.print("Heart Rate: ");
-  if (heartRateValid)
-    Serial.println(heartRate);
+  if (validHeartRate)
+    Serial.print(heartRate);
   else
-    Serial.println("Invalid");
+    Serial.print("Invalid");
 
-  Serial.print("SpO2: ");
-  if (spo2Valid)
-    Serial.println(spo2);
+  Serial.print(" bpm, SpO2: ");
+  if (validSPO2)
+    Serial.print(spo2);
   else
-    Serial.println("Invalid");
-  */
-  // Đợi một lúc trước khi đọc dữ liệu lần tiếp theo
-  delay(1000);}
+    Serial.print("Invalid");
+
+  Serial.println(" %");
+  
+
+  delay(1000); // Wait for a second before the next reading
+}

@@ -66,7 +66,14 @@ def maxim_sort_indices_descend(pn_x, pn_indx, n_size):
     indexed_pn_x.sort(reverse=True, key=lambda x: x[0])
     return [x[1] for x in indexed_pn_x]
 
-
+def plot_data(data, title):
+    plt.figure(figsize=(10, 4))
+    plt.plot(data)
+    plt.title(title)
+    plt.xlabel('Sample number')
+    plt.ylabel('Amplitude')
+    plt.grid(True)
+    plt.show()
 
 
 
@@ -95,9 +102,12 @@ with open('output_100_samples.txt', 'r') as file:
     # Separate IR and RED data
     ir_data = data[:100]
     ir_data = [int(value) for value in ir_data]
+    plot_data(ir_data, "ir raw data")
+
+
     red_data = data[100:200]
     red_data = [int(value) for value in red_data]
-
+    plot_data(red_data, "red raw data")
 
     spo2 = -999
     spo2_valid = 0
@@ -113,10 +123,12 @@ with open('output_100_samples.txt', 'r') as file:
     # Remove DC and invert signal for peak detection
     for k in range(BUFFER_SIZE):
         an_x[k] = -1 * (ir_data[k] - ir_mean)
+    plot_data(an_x, "Remove DC and invert signal for peak detection")
 
     # 4-point Moving Average
     for k in range(BUFFER_SIZE - MA4_SIZE):
         an_x[k] = (an_x[k] + an_x[k + 1] + an_x[k + 2] + an_x[k + 3]) // 4
+    plot_data(an_x, "4-point Moving Average")
 
     # Calculate threshold
     n_th1 = sum(an_x) // BUFFER_SIZE
@@ -127,11 +139,13 @@ with open('output_100_samples.txt', 'r') as file:
 
     # Find peaks (valleys) in the IR signal
     n_npks, an_ir_valley_locs = maxim_find_peaks(an_x, BUFFER_SIZE, n_th1, MIN_DISTANCE, MAX_NUM)
-
+    print(n_npks)
+    print(an_ir_valley_locs)
     # Heart rate calculation
     if n_npks >= 2:
         n_peak_interval_sum = sum(an_ir_valley_locs[k] - an_ir_valley_locs[k - 1] for k in range(1, n_npks)) // (
                 n_npks - 1)
+        print(n_peak_interval_sum)
         heart_rate = (FS * 60) // n_peak_interval_sum
         hr_valid = 1
     else:

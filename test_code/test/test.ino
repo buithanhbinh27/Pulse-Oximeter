@@ -5,12 +5,15 @@
 MAX30105 particleSensor;
 
 uint32_t irBuffer[100]; // IR LED sensor data
+uint32_t irBuffer_filtered[256];
 uint32_t redBuffer[100];  // Red LED sensor data
+uint32_t redBuffer_filtered[256];
 int32_t bufferLength; // Number of samples in the buffer
 int32_t spo2; // Calculated SpO2 value
 int8_t validSPO2; // Indicator to show if the calculated SpO2 is valid
 int32_t heartRate; // Calculated heart rate value
 int8_t validHeartRate; // Indicator to show if the calculated heart rate is valid
+
 
 void setup() {
   Serial.begin(115200);
@@ -26,7 +29,7 @@ void setup() {
 
   Serial.println("MAX30105 initialized.");
 
-  byte ledBrightness = 60; // Options: 0=Off to 255=50mA
+  byte ledBrightness = 64; // Options: 0=Off to 255=50mA
   byte sampleAverage = 1; // Options: 1, 2, 4, 8, 16, 32
   byte ledMode = 2; // Options: 1 = Red only, 2 = Red + IR, 3 = Red + IR + Green
   byte sampleRate = 400; // Options: 50, 100, 200, 400, 800, 1000, 1600, 3200
@@ -45,8 +48,12 @@ void loop() {
     irBuffer[i] = particleSensor.getIR();
     particleSensor.nextSample();
   }
+
+  Serial.println("Check read data");
+  //butterworthFilter()
   // Calculate heart rate and SpO2
-  maxim_heart_rate_and_oxygen_saturation(irBuffer, bufferLength, redBuffer, &spo2, &validSPO2, &heartRate, &validHeartRate);
+  maxim_heart_rate_and_oxygen_saturation(irBuffer_filtered, bufferLength, redBuffer_filtered, &spo2, &validSPO2, &heartRate, &validHeartRate);
+  Serial.println("Check analyze data");
 
   // Print results
   Serial.print("Heart Rate: ");
@@ -64,30 +71,10 @@ void loop() {
 
   Serial.println(" %");
   
+
   delay(1000); // Wait for a second before the next reading
 }
 
-// const int ledPin = 2; // Chân GPIO2 trên ESP32 thường được sử dụng cho LED
-
-// void setup() {
-//   // Thiết lập chân LED là output
-//   pinMode(ledPin, OUTPUT);
-
-//   // Khởi động giao tiếp Serial với baud rate 115200
-//   Serial.begin(115200);
-// }
-
-// void loop() {
-//   // Bật LED
-//   digitalWrite(ledPin, HIGH);
-//   Serial.println("LED is ON");
-//   delay(1000); // Đợi 1 giây
-
-//   // Tắt LED
-//   digitalWrite(ledPin, LOW);
-//   Serial.println("LED is OFF");
-//   delay(1000); // Đợi 1 giây
-// }
 
 
 
